@@ -1,0 +1,1114 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0F172A">
+    <title>CareConnect HK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['DM Sans', 'sans-serif'], display: ['Playfair Display', 'serif'] },
+                    colors: {
+                        pri: { 50:'#EEF0FF', 100:'#DFE3FF', 200:'#C5CAFF', 300:'#A2A6FF', 400:'#7B7AFF', 500:'#5D5CDE', 600:'#4A3FCC', 700:'#3D33B0', 800:'#342D8E', 900:'#1E1A5A' },
+                        surface: { 50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8F0', 800:'#1E293B', 900:'#0F172A', 950:'#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html, body { overscroll-behavior: none; font-family: 'DM Sans', sans-serif; }
+        body { padding-bottom: env(safe-area-inset-bottom); }
+
+        /* App shell */
+        .app-shell { max-width: 430px; margin: 0 auto; min-height: 100dvh; position: relative; overflow-x: hidden; }
+
+        /* Screen transitions */
+        .screen { display: none; animation: slideUp 0.3s ease-out; }
+        .screen.active { display: flex; flex-direction: column; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(93,92,222,0.4); } 50% { box-shadow: 0 0 0 12px rgba(93,92,222,0); } }
+
+        /* Bottom nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; z-index: 40; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-nav .nav-item { transition: all 0.2s; }
+        .bottom-nav .nav-item.active i { color: #5D5CDE; }
+        .bottom-nav .nav-item.active span { color: #5D5CDE; font-weight: 600; }
+        .dark .bottom-nav .nav-item.active i { color: #A2A6FF; }
+        .dark .bottom-nav .nav-item.active span { color: #A2A6FF; }
+
+        /* Cards */
+        .escort-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .escort-card:active { transform: scale(0.97); }
+
+        /* Status pill */
+        .status-avail { background: #DCFCE7; color: #166534; }
+        .dark .status-avail { background: #14532D; color: #86EFAC; }
+        .status-busy { background: #FEF9C3; color: #854D0E; }
+        .dark .status-busy { background: #713F12; color: #FDE68A; }
+
+        /* Chat bubble tails */
+        .bubble-out { border-bottom-right-radius: 4px !important; }
+        .bubble-in { border-bottom-left-radius: 4px !important; }
+
+        /* Splash */
+        .splash-screen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        .splash-screen.hide { opacity: 0; pointer-events: none; }
+
+        /* Scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Input styles override */
+        input, select, textarea { font-size: 16px !important; }
+
+        /* Toast */
+        .toast { animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+        @keyframes toastIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* Gradient mesh */
+        .mesh-bg { background:
+            radial-gradient(ellipse at 20% 50%, rgba(93,92,222,0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 80%, rgba(59,130,246,0.08) 0%, transparent 50%);
+        }
+        .dark .mesh-bg { background:
+            radial-gradient(ellipse at 20% 50%, rgba(93,92,222,0.2) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 80%, rgba(59,130,246,0.1) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-surface-50 dark:bg-surface-950 text-gray-900 dark:text-gray-100">
+
+<!-- Splash Screen -->
+<div id="splash" class="splash-screen bg-surface-900">
+    <div class="text-center">
+        <div class="text-6xl mb-4 animate-pulse">💜</div>
+        <h1 class="font-display text-3xl text-white mb-1">CareConnect</h1>
+        <p class="text-pri-300 text-sm tracking-widest uppercase">Hong Kong</p>
+    </div>
+</div>
+
+<!-- App Shell -->
+<div class="app-shell bg-surface-50 dark:bg-surface-950">
+
+    <!-- ==================== HOME SCREEN ==================== -->
+    <div id="screen-home" class="screen active min-h-screen pb-24">
+        <!-- Status Bar -->
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2 flex items-center justify-between">
+            <div>
+                <h1 class="font-display text-xl text-pri-600 dark:text-pri-300">CareConnect</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="home-undo-btn" onclick="undoLastAction()" class="hidden w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-300">
+                    <i class="fa-solid fa-rotate-left text-sm"></i>
+                </button>
+                <button onclick="navigateTo('profile')" id="home-avatar" class="w-9 h-9 rounded-full bg-pri-100 dark:bg-pri-900 flex items-center justify-center">
+                    <i class="fa-solid fa-user text-pri-600 dark:text-pri-300 text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Hero -->
+        <div class="px-5 pt-4 pb-6 mesh-bg">
+            <div id="home-hero-guest">
+                <h2 class="font-display text-2xl leading-tight mb-2">Compassionate<br>Medical Escorts</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-5">Connecting patients with verified escorts across Hong Kong's 18 districts.</p>
+                <div class="flex gap-3">
+                    <button onclick="navigateTo('register','patient')" class="flex-1 bg-pri-500 text-white py-3 rounded-2xl font-medium text-sm active:scale-95 transition-transform">I Need Help</button>
+                    <button onclick="navigateTo('register','escort')" class="flex-1 border-2 border-pri-500 text-pri-600 dark:text-pri-300 py-3 rounded-2xl font-medium text-sm active:scale-95 transition-transform">Become Escort</button>
+                </div>
+            </div>
+            <div id="home-hero-user" class="hidden">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Welcome back,</p>
+                <h2 class="font-display text-2xl mb-1" id="hero-username">User</h2>
+                <p class="text-xs inline-flex items-center gap-1 px-3 py-1 rounded-full bg-pri-100 dark:bg-pri-900 text-pri-600 dark:text-pri-300" id="hero-role-badge">
+                    <i class="fa-solid fa-user"></i> Patient
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Stats (logged in) -->
+        <div id="home-stats" class="hidden px-5 mb-4">
+            <div class="grid grid-cols-4 gap-2">
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-3 text-center shadow-sm">
+                    <p class="text-lg font-bold text-pri-500">2</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">Upcoming</p>
+                </div>
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-3 text-center shadow-sm">
+                    <p class="text-lg font-bold text-emerald-500">12</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">Done</p>
+                </div>
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-3 text-center shadow-sm">
+                    <p class="text-lg font-bold text-gray-700 dark:text-gray-200">$2.4k</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">Saved</p>
+                </div>
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-3 text-center shadow-sm">
+                    <p class="text-lg font-bold text-amber-500">4.8</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">Rating</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Tracking Banner (logged in) -->
+        <div id="home-tracking-banner" class="hidden px-5 mb-4">
+            <button onclick="navigateTo('tracking')" class="w-full bg-gradient-to-r from-pri-500 to-purple-600 text-white rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition-transform shadow-lg">
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="flex-1 text-left">
+                    <p class="font-medium text-sm">Active Appointment</p>
+                    <p class="text-xs opacity-80">Mary Chen is on the way • 8 min ETA</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-sm opacity-60"></i>
+            </button>
+        </div>
+
+        <!-- How It Works (guest) -->
+        <div id="home-how" class="px-5 mb-6">
+            <h3 class="font-bold text-base mb-3">How It Works</h3>
+            <div class="space-y-3">
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-pri-50 dark:bg-pri-900/40 flex items-center justify-center shrink-0">
+                        <span class="text-lg">👤</span>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-sm">Create Profile</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Set up as patient or escort in 2 minutes. Add medical info &amp; preferences.</p>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                        <span class="text-lg">🔍</span>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-sm">Smart Matching</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Filter by district, language, budget &amp; experience. Real-time availability.</p>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-surface-800 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                        <span class="text-lg">📅</span>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-sm">Book &amp; Track</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Instant booking, GPS tracking, in-app messaging &amp; 24/7 support.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Highlights -->
+        <div class="px-5 mb-6">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-pri-50 dark:bg-pri-900/30 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-bold text-pri-600 dark:text-pri-300">500+</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Verified Escorts</p>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-300">24/7</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Emergency Support</p>
+                </div>
+                <div class="bg-amber-50 dark:bg-amber-900/30 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-bold text-amber-600 dark:text-amber-300">4.8<span class="text-sm">★</span></p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Avg Rating</p>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/30 rounded-2xl p-4 text-center">
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-300">18</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Districts</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Escorts Preview -->
+        <div class="px-5 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-base">Top Escorts</h3>
+                <button onclick="navigateTo('search')" class="text-pri-500 dark:text-pri-300 text-xs font-medium">See All <i class="fa-solid fa-chevron-right text-[10px] ml-0.5"></i></button>
+            </div>
+            <div id="home-featured-escorts" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SEARCH/BROWSE SCREEN ==================== -->
+    <div id="screen-search" class="screen min-h-screen pb-24">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-3">
+            <h2 class="font-bold text-lg mb-3">Find Escorts</h2>
+            <!-- Filter chips -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                <select id="f-district" onchange="applyFilters()" class="shrink-0 text-xs bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-2 appearance-none pr-7" style="background-image: url('data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22&gt;&lt;path d=%22M0 0l5 6 5-6z%22 fill=%22%23999%22/&gt;&lt;/svg&gt;'); background-repeat: no-repeat; background-position: right 8px center;">
+                    <option value="">All Districts</option>
+                    <option>Central &amp; Western</option><option>Wan Chai</option><option>Eastern</option><option>Sha Tin</option><option>Kowloon City</option><option>Yuen Long</option><option>Sham Shui Po</option><option>Tsuen Wan</option><option>Wong Tai Sin</option><option>Kwun Tong</option><option>North</option><option>Islands</option>
+                </select>
+                <select id="f-exp" onchange="applyFilters()" class="shrink-0 text-xs bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-2 appearance-none pr-7" style="background-image: url('data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22&gt;&lt;path d=%22M0 0l5 6 5-6z%22 fill=%22%23999%22/&gt;&lt;/svg&gt;'); background-repeat: no-repeat; background-position: right 8px center;">
+                    <option value="">Experience</option>
+                    <option value="professional">Professional</option><option value="experienced">Experienced</option><option value="some">Some</option>
+                </select>
+                <select id="f-price" onchange="applyFilters()" class="shrink-0 text-xs bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-2 appearance-none pr-7" style="background-image: url('data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22&gt;&lt;path d=%22M0 0l5 6 5-6z%22 fill=%22%23999%22/&gt;&lt;/svg&gt;'); background-repeat: no-repeat; background-position: right 8px center;">
+                    <option value="">Price</option>
+                    <option value="volunteer">Free</option><option value="0-50">$0-50</option><option value="50-100">$50-100</option><option value="100+">$100+</option>
+                </select>
+                <select id="f-lang" onchange="applyFilters()" class="shrink-0 text-xs bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-2 appearance-none pr-7" style="background-image: url('data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22&gt;&lt;path d=%22M0 0l5 6 5-6z%22 fill=%22%23999%22/&gt;&lt;/svg&gt;'); background-repeat: no-repeat; background-position: right 8px center;">
+                    <option value="">Language</option>
+                    <option value="cantonese">Cantonese</option><option value="mandarin">Mandarin</option><option value="english">English</option>
+                </select>
+            </div>
+        </div>
+        <div id="search-results-list" class="px-5 pt-2 space-y-3 pb-4">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- ==================== REGISTER SCREEN ==================== -->
+    <div id="screen-register" class="screen min-h-screen pb-10">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2 flex items-center gap-3">
+            <button onclick="goBack()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-surface-800 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+            <h2 class="font-bold text-lg">Create Account</h2>
+        </div>
+        <div class="px-5 pt-2 pb-8">
+            <form id="register-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <!-- User Type -->
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="cursor-pointer"><input type="radio" name="userType" value="patient" class="sr-only peer">
+                        <div class="border-2 border-gray-200 dark:border-gray-700 peer-checked:border-pri-500 peer-checked:bg-pri-50 dark:peer-checked:bg-pri-900/30 rounded-2xl p-4 text-center transition-all">
+                            <span class="text-2xl block mb-1">👤</span><span class="font-medium text-sm">Patient</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer"><input type="radio" name="userType" value="escort" class="sr-only peer">
+                        <div class="border-2 border-gray-200 dark:border-gray-700 peer-checked:border-pri-500 peer-checked:bg-pri-50 dark:peer-checked:bg-pri-900/30 rounded-2xl p-4 text-center transition-all">
+                            <span class="text-2xl block mb-1">🤝</span><span class="font-medium text-sm">Escort</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">First Name</label>
+                        <input type="text" name="firstName" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none">
+                    </div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Last Name</label>
+                        <input type="text" name="lastName" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none">
+                    </div>
+                </div>
+                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Email</label>
+                    <input type="email" name="email" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none">
+                </div>
+                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Phone</label>
+                    <input type="tel" name="phone" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none">
+                </div>
+                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">District</label>
+                    <select name="district" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none">
+                        <option value="">Select district</option>
+                        <option value="central-western">Central &amp; Western</option><option value="eastern">Eastern</option><option value="southern">Southern</option><option value="wan-chai">Wan Chai</option>
+                        <option value="kowloon-city">Kowloon City</option><option value="kwun-tong">Kwun Tong</option><option value="sham-shui-po">Sham Shui Po</option><option value="wong-tai-sin">Wong Tai Sin</option><option value="yau-tsim-mong">Yau Tsim Mong</option>
+                        <option value="islands">Islands</option><option value="kwai-tsing">Kwai Tsing</option><option value="north">North</option><option value="sai-kung">Sai Kung</option><option value="sha-tin">Sha Tin</option><option value="tai-po">Tai Po</option><option value="tsuen-wan">Tsuen Wan</option><option value="tuen-mun">Tuen Mun</option><option value="yuen-long">Yuen Long</option>
+                    </select>
+                </div>
+
+                <!-- Patient fields -->
+                <div id="reg-patient-fields" class="hidden space-y-4">
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Age</label>
+                        <input type="number" name="age" min="1" max="120" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none"></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Category</label>
+                        <select name="patientCategory" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"><option value="">Select</option><option value="elderly">Elderly (65+)</option><option value="children">Children (&lt;18)</option><option value="adult">Adult (18-64)</option></select></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Preferred Experience</label>
+                        <select name="expectedExperience" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"><option value="any">Any level</option><option value="some">Some experience</option><option value="experienced">Experienced only</option><option value="professional">Healthcare professionals</option></select></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Emergency Contact</label>
+                        <input type="tel" name="emergencyContact" placeholder="Family member phone" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Medical Conditions</label>
+                        <textarea name="medicalConditions" rows="2" placeholder="Any conditions escorts should know" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></textarea></div>
+                    <label class="flex items-center gap-2"><input type="checkbox" name="needsFinancialAssistance" class="w-5 h-5 rounded accent-pri-500"><span class="text-sm">I receive financial assistance (CSSA)</span></label>
+                </div>
+
+                <!-- Escort fields -->
+                <div id="reg-escort-fields" class="hidden space-y-4">
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Experience Level</label>
+                        <select name="experience" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"><option value="">Select</option><option value="none">None</option><option value="some">Some</option><option value="experienced">Experienced</option><option value="professional">Healthcare professional</option></select></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Emergency Contact</label>
+                        <input type="tel" name="emergencyContact" placeholder="Family member phone" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Languages</label>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="flex items-center gap-2"><input type="checkbox" name="languages" value="cantonese" class="w-5 h-5 rounded accent-pri-500"><span class="text-sm">Cantonese</span></label>
+                            <label class="flex items-center gap-2"><input type="checkbox" name="languages" value="mandarin" class="w-5 h-5 rounded accent-pri-500"><span class="text-sm">Mandarin</span></label>
+                            <label class="flex items-center gap-2"><input type="checkbox" name="languages" value="english" class="w-5 h-5 rounded accent-pri-500"><span class="text-sm">English</span></label>
+                        </div></div>
+                    <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Hourly Rate (HKD)</label>
+                        <input type="number" name="hourlyRate" min="0" max="500" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+                    <label class="flex items-center gap-2"><input type="checkbox" name="volunteerWork" class="w-5 h-5 rounded accent-pri-500"><span class="text-sm">Interested in volunteer work</span></label>
+                </div>
+
+                <!-- Privacy -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-3">
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" name="privacyAgreement" required="" class="w-5 h-5 rounded accent-pri-500 mt-0.5 shrink-0">
+                        <span class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">I agree that CareConnect HK may collect and share my info with matched escorts for service delivery.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full bg-pri-500 text-white py-3.5 rounded-2xl font-medium active:scale-95 transition-transform">Create Account</button>
+                <p class="text-center text-sm text-gray-500">Already have an account? <button type="button" onclick="navigateTo('login')" class="text-pri-500 font-medium">Sign in</button></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="screen-login" class="screen min-h-screen pb-10">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2 flex items-center gap-3">
+            <button onclick="goBack()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-surface-800 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+            <h2 class="font-bold text-lg">Sign In</h2>
+        </div>
+        <div class="px-5 pt-8">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-3">💜</div>
+                <h3 class="font-display text-2xl">Welcome Back</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Sign in to your account</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Email</label>
+                    <input type="email" name="email" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none"></div>
+                <div><label class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Password</label>
+                    <input type="password" name="password" required="" class="w-full px-4 py-3 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pri-500 focus:border-transparent outline-none"></div>
+                <button type="submit" class="w-full bg-pri-500 text-white py-3.5 rounded-2xl font-medium active:scale-95 transition-transform">Sign In</button>
+                <p class="text-center text-sm text-gray-500">No account? <button type="button" onclick="navigateTo('register')" class="text-pri-500 font-medium">Register</button></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== TRACKING SCREEN ==================== -->
+    <div id="screen-tracking" class="screen min-h-screen pb-24">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2 flex items-center gap-3">
+            <button onclick="goBack()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-surface-800 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+            <h2 class="font-bold text-lg">Live Tracking</h2>
+        </div>
+
+        <!-- Map area -->
+        <div class="mx-5 mt-2 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-emerald-100 dark:from-blue-900/40 dark:to-emerald-900/40 h-48 relative flex items-center justify-center">
+            <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(0,0,0,0.05) 30px, rgba(0,0,0,0.05) 31px), repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(0,0,0,0.05) 30px, rgba(0,0,0,0.05) 31px);"></div>
+            <div class="text-center relative z-10">
+                <div class="text-4xl animate-pulse mb-1">📍</div>
+                <p class="text-sm font-medium" id="track-location">Central MTR Station</p>
+                <p class="text-xs text-gray-600 dark:text-gray-300" id="track-distance">~2.3 km away</p>
+            </div>
+            <div class="absolute bottom-3 right-3 bg-white dark:bg-surface-800 rounded-xl px-3 py-2 shadow-lg">
+                <p class="text-[10px] text-gray-500">ETA</p>
+                <p class="text-lg font-bold text-pri-500" id="track-eta">8 min</p>
+            </div>
+        </div>
+
+        <!-- Escort card -->
+        <div class="mx-5 mt-4 bg-white dark:bg-surface-800 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+            <div class="text-3xl">👩‍⚕️</div>
+            <div class="flex-1">
+                <h4 class="font-medium text-sm">Mary Chen</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Elderly Care Specialist</p>
+                <p class="text-xs text-emerald-500 mt-0.5"><i class="fa-solid fa-circle text-[6px] mr-1"></i>Online</p>
+            </div>
+            <button onclick="navigateTo('chat')" class="w-10 h-10 bg-pri-500 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-comment text-sm"></i></button>
+            <button onclick="callEscort()" class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-phone text-sm"></i></button>
+        </div>
+
+        <!-- Journey steps -->
+        <div class="mx-5 mt-4 bg-white dark:bg-surface-800 rounded-2xl p-4 shadow-sm">
+            <h4 class="font-medium text-xs text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">Journey Progress</h4>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3"><div class="w-7 h-7 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center"><i class="fa-solid fa-check text-emerald-600 dark:text-emerald-300 text-[10px]"></i></div><div><p class="text-sm font-medium">Escort confirmed</p><p class="text-[10px] text-gray-500">10:15 AM</p></div></div>
+                <div class="flex items-center gap-3"><div class="w-7 h-7 bg-pri-100 dark:bg-pri-900 rounded-full flex items-center justify-center animate-pulse"><i class="fa-solid fa-arrow-right text-pri-600 dark:text-pri-300 text-[10px]"></i></div><div><p class="text-sm font-medium">En route to pickup</p><p class="text-[10px] text-gray-500">Current</p></div></div>
+                <div class="flex items-center gap-3 opacity-40"><div class="w-7 h-7 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center"><i class="fa-solid fa-circle text-gray-400 text-[6px]"></i></div><div><p class="text-sm font-medium">Arrive at Queen Mary Hospital</p><p class="text-[10px] text-gray-500">~11:00 AM</p></div></div>
+            </div>
+        </div>
+
+        <!-- Emergency -->
+        <div class="mx-5 mt-4 mb-4">
+            <button onclick="showEmergencySheet()" class="w-full bg-red-500 text-white py-3.5 rounded-2xl font-medium active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> Emergency / Need Help
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== CHAT SCREEN ==================== -->
+    <div id="screen-chat" class="screen h-screen">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800">
+            <button onclick="goBack()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-surface-800 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+            <div class="flex-1"><h2 class="font-medium text-sm">Mary Chen</h2><p class="text-[10px] text-emerald-500"><i class="fa-solid fa-circle text-[5px] mr-1"></i>Online</p></div>
+            <button onclick="callEscort()" class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600"><i class="fa-solid fa-phone text-sm"></i></button>
+        </div>
+
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 no-scrollbar" style="height: calc(100dvh - 130px);">
+            <div class="flex items-end gap-2"><div class="text-lg">👩‍⚕️</div><div class="bg-white dark:bg-surface-800 rounded-2xl bubble-in p-3 max-w-[75%] shadow-sm"><p class="text-sm">Good morning! I'm on my way. About 8 minutes away.</p><p class="text-[10px] text-gray-400 mt-1">10:20 AM</p></div></div>
+            <div class="flex items-end gap-2 justify-end"><div class="bg-pri-500 text-white rounded-2xl bubble-out p-3 max-w-[75%]"><p class="text-sm">Thank you! I'll be at the lobby.</p><p class="text-[10px] opacity-60 mt-1">10:21 AM</p></div></div>
+            <div class="text-center"><span class="inline-block text-[10px] text-gray-400 bg-gray-100 dark:bg-surface-800 rounded-full px-3 py-1">Mary is 2.3 km away</span></div>
+        </div>
+
+        <div class="sticky bottom-0 bg-surface-50 dark:bg-surface-950 border-t border-gray-100 dark:border-gray-800 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+            <div class="flex gap-2 mb-2 overflow-x-auto no-scrollbar">
+                <button onclick="sendQuickMessage('I\'m ready')" class="shrink-0 text-xs bg-gray-100 dark:bg-surface-800 px-3 py-1.5 rounded-full">I'm ready ✓</button>
+                <button onclick="sendQuickMessage('Running late')" class="shrink-0 text-xs bg-gray-100 dark:bg-surface-800 px-3 py-1.5 rounded-full">Running late ⏰</button>
+                <button onclick="sendQuickMessage('Please call me')" class="shrink-0 text-xs bg-gray-100 dark:bg-surface-800 px-3 py-1.5 rounded-full">Call me 📞</button>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="chat-input" placeholder="Type message..." class="flex-1 px-4 py-2.5 bg-white dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-full outline-none focus:ring-2 focus:ring-pri-500">
+                <button onclick="sendMessage()" class="w-10 h-10 bg-pri-500 rounded-full flex items-center justify-center text-white shrink-0 active:scale-90 transition-transform"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JOBS SCREEN (Escort) ==================== -->
+    <div id="screen-jobs" class="screen min-h-screen pb-24">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2">
+            <h2 class="font-bold text-lg">Available Jobs</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Accept jobs near you</p>
+        </div>
+        <div id="jobs-list" class="px-5 pt-2 space-y-3 pb-4">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- ==================== PROFILE SCREEN ==================== -->
+    <div id="screen-profile" class="screen min-h-screen pb-24">
+        <div class="sticky top-0 z-30 bg-surface-50/80 dark:bg-surface-950/80 backdrop-blur-xl px-5 pt-3 pb-2">
+            <h2 class="font-bold text-lg">Profile</h2>
+        </div>
+
+        <!-- Guest Profile -->
+        <div id="profile-guest" class="px-5 pt-8 text-center">
+            <div class="w-20 h-20 bg-pri-100 dark:bg-pri-900 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-user text-pri-500 text-2xl"></i></div>
+            <h3 class="font-medium text-lg mb-1">Not signed in</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Sign in or create an account to get started</p>
+            <div class="space-y-3">
+                <button onclick="navigateTo('login')" class="w-full bg-pri-500 text-white py-3.5 rounded-2xl font-medium">Sign In</button>
+                <button onclick="navigateTo('register')" class="w-full border-2 border-pri-500 text-pri-600 dark:text-pri-300 py-3.5 rounded-2xl font-medium">Create Account</button>
+            </div>
+        </div>
+
+        <!-- Logged In Profile -->
+        <div id="profile-user" class="hidden px-5 pt-4 space-y-4">
+            <div class="bg-white dark:bg-surface-800 rounded-2xl p-5 text-center shadow-sm">
+                <div class="w-16 h-16 bg-pri-100 dark:bg-pri-900 rounded-full flex items-center justify-center mx-auto mb-3"><span class="text-2xl" id="profile-emoji">👤</span></div>
+                <h3 class="font-medium text-lg" id="profile-name">User</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400" id="profile-email">email@example.com</p>
+                <p class="text-xs mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-pri-100 dark:bg-pri-900 text-pri-600 dark:text-pri-300" id="profile-role">Patient</p>
+            </div>
+
+            <!-- Actions -->
+            <div class="bg-white dark:bg-surface-800 rounded-2xl shadow-sm overflow-hidden">
+                <button onclick="switchRole()" class="w-full px-5 py-4 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 active:bg-gray-50 dark:active:bg-surface-900 transition-colors text-left">
+                    <div class="w-9 h-9 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center"><i class="fa-solid fa-repeat text-purple-600 dark:text-purple-300 text-sm"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium">Switch Role</p><p class="text-xs text-gray-500 dark:text-gray-400" id="profile-switch-label">Switch to Escort</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </button>
+                <button onclick="showEmergencyBooking()" class="w-full px-5 py-4 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 active:bg-gray-50 dark:active:bg-surface-900 transition-colors text-left">
+                    <div class="w-9 h-9 bg-red-100 dark:bg-red-900/40 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bolt text-red-500 text-sm"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium">Emergency Booking</p><p class="text-xs text-gray-500 dark:text-gray-400">Request urgent escort</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </button>
+                <button onclick="undoLastAction()" id="profile-undo-btn" class="hidden w-full px-5 py-4 flex items-center gap-3 active:bg-gray-50 dark:active:bg-surface-900 transition-colors text-left">
+                    <div class="w-9 h-9 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center"><i class="fa-solid fa-rotate-left text-amber-600 text-sm"></i></div>
+                    <div class="flex-1"><p class="text-sm font-medium">Undo Last Action</p><p class="text-xs text-gray-500 dark:text-gray-400" id="profile-undo-label">No actions to undo</p></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Schedule -->
+            <div class="bg-white dark:bg-surface-800 rounded-2xl p-5 shadow-sm">
+                <h4 class="font-medium text-sm mb-3">Upcoming Appointments</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3"><div class="w-1 h-10 bg-pri-500 rounded-full shrink-0"></div><div><p class="text-sm font-medium">Cardiology Check-up</p><p class="text-[10px] text-gray-500">Tomorrow, 10:00 AM • Mary Chen</p></div></div>
+                    <div class="flex items-center gap-3"><div class="w-1 h-10 bg-blue-500 rounded-full shrink-0"></div><div><p class="text-sm font-medium">Orthopedic Visit</p><p class="text-[10px] text-gray-500">Dec 28, 2:00 PM • John Wong</p></div></div>
+                </div>
+            </div>
+
+            <button onclick="logout()" class="w-full py-3.5 rounded-2xl border-2 border-red-200 dark:border-red-900 text-red-500 font-medium active:scale-95 transition-transform mb-6">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ==================== BOTTOM NAVIGATION ==================== -->
+    <div class="bottom-nav bg-white/90 dark:bg-surface-900/90 backdrop-blur-xl border-t border-gray-100 dark:border-gray-800" id="bottom-nav">
+        <div class="flex items-center justify-around py-2 px-2">
+            <button onclick="navigateTo('home')" class="nav-item active flex flex-col items-center py-1 px-3" data-nav="home">
+                <i class="fa-solid fa-house text-base mb-0.5"></i><span class="text-[10px]">Home</span>
+            </button>
+            <button onclick="navigateTo('search')" class="nav-item flex flex-col items-center py-1 px-3" data-nav="search">
+                <i class="fa-solid fa-magnifying-glass text-base mb-0.5"></i><span class="text-[10px]">Search</span>
+            </button>
+            <button onclick="navigateTo('jobs')" class="nav-item flex flex-col items-center py-1 px-3" data-nav="jobs" id="nav-jobs-btn">
+                <i class="fa-solid fa-briefcase text-base mb-0.5"></i><span class="text-[10px]">Jobs</span>
+            </button>
+            <button onclick="navigateTo('profile')" class="nav-item flex flex-col items-center py-1 px-3" data-nav="profile">
+                <i class="fa-solid fa-user text-base mb-0.5"></i><span class="text-[10px]">Profile</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODALS (overlays) ==================== -->
+<!-- Booking Sheet -->
+<div id="modal-booking" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('booking')"></div>
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white dark:bg-surface-900 rounded-t-3xl p-5 pb-8 max-h-[85vh] overflow-y-auto" style="animation: slideUp 0.3s ease-out;">
+        <div class="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
+        <div id="modal-booking-content"></div>
+    </div>
+</div>
+
+<!-- Emergency Sheet -->
+<div id="modal-emergency" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('emergency')"></div>
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white dark:bg-surface-900 rounded-t-3xl p-5 pb-8" style="animation: slideUp 0.3s ease-out;">
+        <div class="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4"></div>
+        <h3 class="font-bold text-lg mb-4">Emergency Options</h3>
+        <div class="space-y-3">
+            <button onclick="callEmergency()" class="w-full bg-red-500 text-white p-4 rounded-2xl flex items-center gap-3 active:scale-95 transition-transform text-left">
+                <i class="fa-solid fa-phone-volume text-xl"></i><div><p class="font-medium text-sm">Call 999</p><p class="text-xs opacity-80">Emergency Services</p></div>
+            </button>
+            <button onclick="notifyFamily()" class="w-full bg-orange-500 text-white p-4 rounded-2xl flex items-center gap-3 active:scale-95 transition-transform text-left">
+                <i class="fa-solid fa-people-roof text-xl"></i><div><p class="font-medium text-sm">Alert Family</p><p class="text-xs opacity-80">Notify emergency contact</p></div>
+            </button>
+            <button onclick="reportIssue()" class="w-full bg-amber-500 text-white p-4 rounded-2xl flex items-center gap-3 active:scale-95 transition-transform text-left">
+                <i class="fa-solid fa-flag text-xl"></i><div><p class="font-medium text-sm">Report Issue</p><p class="text-xs opacity-80">Contact CareConnect support</p></div>
+            </button>
+            <button onclick="closeModal('emergency')" class="w-full py-3 text-gray-500 text-sm">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[400px] pointer-events-none"></div>
+
+<script>
+// ==================== DARK MODE ====================
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('dark');
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    document.documentElement.classList.toggle('dark', e.matches);
+});
+
+// ==================== STATE ====================
+let currentUser = null;
+let availableEscorts = [];
+let availableJobs = [];
+let actionHistory = [];
+let originalUserType = null;
+let navHistory = ['home'];
+let trackingInterval = null;
+
+const ADMIN_EMAIL = 'amy223372@gmail.com';
+const WEB3FORMS_ACCESS_KEY = '95ae23ad-7580-46b4-8d05-0da3476b6621';
+
+// ==================== SAMPLE DATA ====================
+const sampleEscorts = [
+    { id:1, name:"Mary Chen", rating:4.9, experience:"experienced", languages:["cantonese","english"], hourlyRate:80, availability:"Available", completedJobs:156, volunteer:true, photo:"👩‍⚕️", specialty:"Elderly Care", district:"Central & Western" },
+    { id:2, name:"John Wong", rating:4.7, experience:"professional", languages:["cantonese","mandarin"], hourlyRate:120, availability:"Available", completedJobs:203, volunteer:false, photo:"👨‍⚕️", specialty:"Registered Nurse", district:"Wan Chai" },
+    { id:3, name:"Lisa Zhang", rating:4.8, experience:"some", languages:["mandarin","english"], hourlyRate:60, availability:"Available", completedJobs:89, volunteer:true, photo:"👩", specialty:"Student Volunteer", district:"Sha Tin" },
+    { id:4, name:"David Lam", rating:4.6, experience:"experienced", languages:["cantonese","english"], hourlyRate:90, availability:"Busy until 3 PM", completedJobs:134, volunteer:false, photo:"👨", specialty:"Physio Assistant", district:"Kowloon City" },
+    { id:5, name:"Susan Ng", rating:4.9, experience:"professional", languages:["cantonese","english","mandarin"], hourlyRate:150, availability:"Available", completedJobs:287, volunteer:false, photo:"👩‍⚕️", specialty:"Former Hospital Staff", district:"Eastern" },
+    { id:6, name:"Amy Wu", rating:4.5, experience:"some", languages:["cantonese"], hourlyRate:50, availability:"Available", completedJobs:45, volunteer:true, photo:"👧", specialty:"University Student", district:"Sham Shui Po" },
+    { id:7, name:"Robert Chan", rating:4.8, experience:"experienced", languages:["english","cantonese"], hourlyRate:100, availability:"Available", completedJobs:178, volunteer:false, photo:"👨‍💼", specialty:"Family Caregiver", district:"Tsuen Wan" },
+    { id:8, name:"Grace Liu", rating:4.7, experience:"professional", languages:["mandarin","cantonese","english"], hourlyRate:110, availability:"Weekends", completedJobs:95, volunteer:true, photo:"👩‍⚕️", specialty:"Healthcare Pro", district:"Yuen Long" },
+    { id:9, name:"Kevin Yeung", rating:4.4, experience:"some", languages:["cantonese","english"], hourlyRate:65, availability:"Available", completedJobs:67, volunteer:false, photo:"👦", specialty:"Part-time Helper", district:"Kwun Tong" },
+    { id:10, name:"Helen Ho", rating:4.9, experience:"experienced", languages:["cantonese"], hourlyRate:75, availability:"Available", completedJobs:201, volunteer:true, photo:"👵", specialty:"Retired Nurse", district:"Wong Tai Sin" },
+    { id:11, name:"Michael Tam", rating:4.3, experience:"none", languages:["cantonese","mandarin"], hourlyRate:40, availability:"Available", completedJobs:12, volunteer:true, photo:"👨‍🎓", specialty:"New Volunteer", district:"North" },
+    { id:12, name:"Catherine Lee", rating:4.8, experience:"experienced", languages:["english","cantonese"], hourlyRate:95, availability:"Mornings", completedJobs:156, volunteer:false, photo:"👩", specialty:"Caregiver", district:"Islands" }
+];
+
+const sampleJobs = [
+    { id:1, patient:"Mrs. Lam", type:"Hospital Visit", date:"Tomorrow", time:"10:00 AM", location:"Queen Mary Hospital", payment:"$80", urgent:false, volunteer:false },
+    { id:2, patient:"Mr. Ng", type:"Clinic Appointment", date:"Dec 28", time:"2:00 PM", location:"Central Clinic", payment:"Volunteer", urgent:false, volunteer:true },
+    { id:3, patient:"Mrs. Ho", type:"Emergency Visit", date:"Today", time:"ASAP", location:"Prince of Wales Hospital", payment:"$150", urgent:true, volunteer:false }
+];
+
+// ==================== NAVIGATION ====================
+function navigateTo(screen, extra) {
+    if (screen === 'register' && extra) {
+        setTimeout(() => {
+            const radio = document.querySelector(`input[name="userType"][value="${extra}"]`);
+            if (radio) { radio.checked = true; toggleRegFields(extra); }
+        }, 50);
+    }
+
+    // Hide all screens
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('screen-' + screen);
+    if (el) el.classList.add('active');
+
+    // Track history
+    if (navHistory[navHistory.length - 1] !== screen) navHistory.push(screen);
+
+    // Update bottom nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navBtn = document.querySelector(`[data-nav="${screen}"]`);
+    if (navBtn) navBtn.classList.add('active');
+
+    // Show/hide bottom nav
+    const hideNav = ['register','login','chat','tracking'].includes(screen);
+    document.getElementById('bottom-nav').style.display = hideNav ? 'none' : '';
+
+    // Trigger screen-specific logic
+    if (screen === 'search') renderSearchResults();
+    if (screen === 'jobs') renderJobs();
+    if (screen === 'profile') updateProfileScreen();
+    if (screen === 'tracking') startTracking();
+    if (screen === 'home') updateHomeScreen();
+}
+
+function goBack() {
+    navHistory.pop();
+    const prev = navHistory[navHistory.length - 1] || 'home';
+    navHistory.pop(); // navigateTo will push again
+    navigateTo(prev);
+}
+
+// ==================== HOME SCREEN ====================
+function updateHomeScreen() {
+    const guest = document.getElementById('home-hero-guest');
+    const user = document.getElementById('home-hero-user');
+    const stats = document.getElementById('home-stats');
+    const howSection = document.getElementById('home-how');
+    const trackBanner = document.getElementById('home-tracking-banner');
+    const undoBtn = document.getElementById('home-undo-btn');
+
+    if (currentUser) {
+        guest.classList.add('hidden');
+        user.classList.remove('hidden');
+        stats.classList.remove('hidden');
+        trackBanner.classList.remove('hidden');
+        howSection.classList.add('hidden');
+        document.getElementById('hero-username').textContent = currentUser.firstName || 'User';
+        const isPatient = currentUser.userType === 'patient';
+        document.getElementById('hero-role-badge').innerHTML = `<i class="fa-solid fa-${isPatient ? 'user' : 'handshake'}"></i> ${isPatient ? 'Patient' : 'Escort'}`;
+        undoBtn.classList.toggle('hidden', actionHistory.length === 0);
+    } else {
+        guest.classList.remove('hidden');
+        user.classList.add('hidden');
+        stats.classList.add('hidden');
+        trackBanner.classList.add('hidden');
+        howSection.classList.remove('hidden');
+        undoBtn.classList.add('hidden');
+    }
+}
+
+function renderFeaturedEscorts() {
+    const container = document.getElementById('home-featured-escorts');
+    container.innerHTML = '';
+    sampleEscorts.slice(0, 6).forEach(e => {
+        const avail = e.availability === 'Available';
+        container.innerHTML += `
+        <div class="shrink-0 w-36 bg-white dark:bg-surface-800 rounded-2xl p-4 shadow-sm escort-card" onclick="${currentUser ? `bookEscort(${e.id})` : `navigateTo('register','patient')`}">
+            <div class="text-3xl text-center mb-2">${e.photo}</div>
+            <h4 class="font-medium text-sm text-center truncate">${e.name}</h4>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 text-center mb-2">${e.specialty}</p>
+            <div class="flex items-center justify-center gap-1 text-xs">
+                <span class="text-amber-500">★</span><span>${e.rating}</span>
+                <span class="text-gray-300 mx-1">|</span>
+                <span class="text-pri-500 font-medium">$${e.hourlyRate}</span>
+            </div>
+            <span class="block mt-2 text-center text-[10px] px-2 py-0.5 rounded-full ${avail ? 'status-avail' : 'status-busy'}">${e.availability}</span>
+        </div>`;
+    });
+}
+
+// ==================== SEARCH SCREEN ====================
+function applyFilters() { renderSearchResults(); }
+
+function renderSearchResults() {
+    const district = document.getElementById('f-district').value;
+    const exp = document.getElementById('f-exp').value;
+    const price = document.getElementById('f-price').value;
+    const lang = document.getElementById('f-lang').value;
+
+    let filtered = [...availableEscorts];
+    if (district) filtered = filtered.filter(e => e.district === district);
+    if (exp) filtered = filtered.filter(e => e.experience === exp);
+    if (lang) filtered = filtered.filter(e => e.languages.includes(lang));
+    if (price) {
+        if (price === 'volunteer') filtered = filtered.filter(e => e.volunteer);
+        else if (price === '0-50') filtered = filtered.filter(e => e.hourlyRate <= 50);
+        else if (price === '50-100') filtered = filtered.filter(e => e.hourlyRate > 50 && e.hourlyRate <= 100);
+        else if (price === '100+') filtered = filtered.filter(e => e.hourlyRate > 100);
+    }
+
+    const container = document.getElementById('search-results-list');
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fa-solid fa-search text-3xl mb-3 block"></i><p class="text-sm">No escorts match your filters</p></div>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(e => {
+        const avail = e.availability === 'Available';
+        return `
+        <div class="escort-card bg-white dark:bg-surface-800 rounded-2xl p-4 shadow-sm" onclick="${currentUser ? `bookEscort(${e.id})` : `navigateTo('register','patient')`}">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">${e.photo}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <h4 class="font-medium text-sm truncate">${e.name}</h4>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full ${avail ? 'status-avail' : 'status-busy'} shrink-0">${e.availability}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${e.specialty} &bull; ${e.district}</p>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span class="text-xs"><span class="text-amber-500">★</span> ${e.rating}</span>
+                        <span class="text-xs text-gray-400">${e.completedJobs} jobs</span>
+                        <span class="text-xs font-medium text-pri-500">$${e.hourlyRate}/hr</span>
+                        ${e.volunteer ? '<span class="text-[10px] text-emerald-500">Free option</span>' : ''}
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-300 text-xs shrink-0"></i>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ==================== JOBS SCREEN (Escort) ====================
+function renderJobs() {
+    const container = document.getElementById('jobs-list');
+    if (availableJobs.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fa-solid fa-briefcase text-3xl mb-3 block"></i><p class="text-sm">No jobs available</p></div>';
+        return;
+    }
+    container.innerHTML = availableJobs.map(j => `
+        <div class="bg-white dark:bg-surface-800 rounded-2xl p-4 shadow-sm ${j.urgent ? 'ring-2 ring-red-400' : ''}">
+            <div class="flex items-center gap-2 mb-2">
+                <h4 class="font-medium text-sm">${j.patient} &mdash; ${j.type}</h4>
+                ${j.urgent ? '<span class="text-[10px] bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 px-2 py-0.5 rounded-full">Urgent</span>' : ''}
+                ${j.volunteer ? '<span class="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full">Volunteer</span>' : ''}
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${j.date} at ${j.time}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400"><i class="fa-solid fa-location-dot mr-1"></i>${j.location}</p>
+            <div class="flex items-center justify-between mt-3">
+                <span class="text-sm font-medium text-emerald-500">${j.payment}</span>
+                <button onclick="event.stopPropagation(); acceptJob(${j.id})" class="bg-pri-500 text-white text-xs px-5 py-2 rounded-full active:scale-95 transition-transform">Accept</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ==================== AUTH ====================
+function toggleRegFields(type) {
+    document.getElementById('reg-patient-fields').classList.toggle('hidden', type !== 'patient');
+    document.getElementById('reg-escort-fields').classList.toggle('hidden', type !== 'escort');
+}
+
+// Register form user type listeners
+document.querySelectorAll('#register-form input[name="userType"]').forEach(r => {
+    r.addEventListener('change', function() { toggleRegFields(this.value); });
+});
+
+function handleAuth(event) {
+    event.preventDefault();
+    const fd = new FormData(event.target);
+    const data = Object.fromEntries(fd.entries());
+    currentUser = { ...data, id: Date.now(), joinDate: new Date().toISOString().split('T')[0] };
+    originalUserType = currentUser.userType;
+    addToHistory('registration', { action:'Registered', user: { ...currentUser } });
+    sendEmailNotification('registration', currentUser);
+    showToast(`Welcome, ${data.firstName}! Account created.`);
+    navigateTo('home');
+}
+
+function handleLogin(event) {
+    event.preventDefault();
+    const fd = new FormData(event.target);
+    const email = fd.get('email');
+    currentUser = { email, firstName: email.split('@')[0], userType: 'patient', id: Date.now() };
+    sendEmailNotification('login', { email, timestamp: new Date().toISOString(), userType: 'patient' });
+    showToast(`Welcome back!`);
+    navigateTo('home');
+}
+
+function logout() {
+    currentUser = null;
+    actionHistory = [];
+    navigateTo('home');
+    showToast('Signed out successfully');
+}
+
+function updateProfileScreen() {
+    const guestEl = document.getElementById('profile-guest');
+    const userEl = document.getElementById('profile-user');
+    if (currentUser) {
+        guestEl.classList.add('hidden');
+        userEl.classList.remove('hidden');
+        const isPatient = currentUser.userType === 'patient';
+        document.getElementById('profile-name').textContent = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'User';
+        document.getElementById('profile-email').textContent = currentUser.email || '';
+        document.getElementById('profile-emoji').textContent = isPatient ? '👤' : '🤝';
+        document.getElementById('profile-role').textContent = isPatient ? 'Patient' : 'Escort';
+        document.getElementById('profile-switch-label').textContent = `Switch to ${isPatient ? 'Escort' : 'Patient'}`;
+        const undoBtn = document.getElementById('profile-undo-btn');
+        if (actionHistory.length > 0) {
+            undoBtn.classList.remove('hidden');
+            document.getElementById('profile-undo-label').textContent = `${actionHistory.length} action(s) in history`;
+        } else {
+            undoBtn.classList.add('hidden');
+        }
+    } else {
+        guestEl.classList.remove('hidden');
+        userEl.classList.add('hidden');
+    }
+}
+
+// ==================== BOOKING ====================
+function bookEscort(id) {
+    const e = availableEscorts.find(x => x.id === id);
+    if (!e) return;
+    const content = document.getElementById('modal-booking-content');
+    content.innerHTML = `
+        <div class="flex items-center gap-3 mb-4">
+            <div class="text-3xl">${e.photo}</div>
+            <div><h4 class="font-medium">${e.name}</h4><p class="text-xs text-gray-500">${e.specialty} &bull; ★${e.rating}</p></div>
+        </div>
+        <form onsubmit="confirmBooking(event, ${e.id})" class="space-y-3">
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Date</label><input type="date" name="date" required class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Time</label>
+                <select name="time" required class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none">
+                    <option value="">Select</option><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+                </select></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Hospital/Clinic</label><input type="text" name="location" required placeholder="e.g., Queen Mary Hospital" class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Service Type</label>
+                <select name="serviceType" required class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none">
+                    <option value="">Select</option>${e.volunteer ? '<option value="volunteer">Free (Volunteer)</option>' : ''}<option value="paid">Paid ($${e.hourlyRate}/hr)</option>
+                </select></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Notes</label><textarea name="notes" rows="2" placeholder="Special requirements" class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></textarea></div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeModal('booking')" class="flex-1 py-3 rounded-2xl border-2 border-gray-200 dark:border-gray-700 text-sm font-medium">Cancel</button>
+                <button type="submit" class="flex-1 py-3 rounded-2xl bg-pri-500 text-white text-sm font-medium active:scale-95 transition-transform">Book Now</button>
+            </div>
+        </form>`;
+    document.getElementById('modal-booking').classList.remove('hidden');
+}
+
+function confirmBooking(event, escortId) {
+    event.preventDefault();
+    const fd = new FormData(event.target);
+    const booking = Object.fromEntries(fd.entries());
+    const escort = availableEscorts.find(e => e.id === escortId);
+    addToHistory('booking', { action:'Booked', escortId, escortName: escort.name, bookingData: { ...booking } });
+    sendEmailNotification('booking', { patient: currentUser, escort, bookingDetails: booking, timestamp: new Date().toISOString() });
+    closeModal('booking');
+    showToast(`Booked ${escort.name}! Confirmation sent.`);
+}
+
+function showEmergencyBooking() {
+    const content = document.getElementById('modal-booking-content');
+    content.innerHTML = `
+        <div class="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl mb-4">
+            <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500 mb-1"></i>
+            <h4 class="font-bold text-red-600 dark:text-red-400 text-sm">Emergency Booking</h4>
+            <p class="text-[10px] text-red-500">Immediate assistance within 2 hours</p>
+        </div>
+        <form onsubmit="confirmEmergencyBooking(event)" class="space-y-3">
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Current Location</label><input type="text" name="location" required placeholder="Your address" class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Destination</label><input type="text" name="destination" required placeholder="Hospital/Clinic" class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Urgency</label>
+                <select name="urgency" required class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none">
+                    <option value="">Select</option><option value="immediate">Within 30 min</option><option value="urgent">Within 1 hour</option><option value="priority">Within 2 hours</option>
+                </select></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Contact Number</label><input type="tel" name="phone" required class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></div>
+            <div><label class="text-xs font-medium text-gray-500 mb-1 block">Details</label><textarea name="details" rows="2" required placeholder="Describe the emergency" class="w-full px-4 py-3 bg-gray-50 dark:bg-surface-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none"></textarea></div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeModal('booking')" class="flex-1 py-3 rounded-2xl border-2 border-gray-200 dark:border-gray-700 text-sm font-medium">Cancel</button>
+                <button type="submit" class="flex-1 py-3 rounded-2xl bg-red-500 text-white text-sm font-medium active:scale-95 transition-transform">Request Now</button>
+            </div>
+        </form>`;
+    document.getElementById('modal-booking').classList.remove('hidden');
+}
+
+function confirmEmergencyBooking(event) {
+    event.preventDefault();
+    const fd = new FormData(event.target);
+    const data = Object.fromEntries(fd.entries());
+    addToHistory('emergency_booking', { action:'Emergency', emergencyData: { ...data } });
+    sendEmailNotification('emergency_booking', data);
+    closeModal('booking');
+    showToast('Emergency request sent! Escort will contact you in 15 min.');
+}
+
+function closeModal(name) {
+    document.getElementById('modal-' + name).classList.add('hidden');
+}
+
+// ==================== JOBS ====================
+function acceptJob(jobId) {
+    const job = availableJobs.find(j => j.id === jobId);
+    if (!job) return;
+    addToHistory('job_acceptance', { action:'Accepted job', job: { ...job } });
+    availableJobs = availableJobs.filter(j => j.id !== jobId);
+    renderJobs();
+    showToast(`Job accepted! Helping ${job.patient} on ${job.date}.`);
+}
+
+// ==================== TRACKING ====================
+function startTracking() {
+    if (trackingInterval) clearInterval(trackingInterval);
+    let dist = 2.3, eta = 8;
+    document.getElementById('track-distance').textContent = `~${dist.toFixed(1)} km away`;
+    document.getElementById('track-eta').textContent = `${eta} min`;
+    document.getElementById('track-location').textContent = 'Central MTR Station';
+
+    trackingInterval = setInterval(() => {
+        dist = Math.max(0.1, dist - 0.3);
+        eta = Math.max(1, eta - 1);
+        document.getElementById('track-distance').textContent = `~${dist.toFixed(1)} km away`;
+        document.getElementById('track-eta').textContent = `${eta} min`;
+        if (eta <= 1) {
+            document.getElementById('track-location').textContent = 'Arriving at your location!';
+            clearInterval(trackingInterval);
+        }
+    }, 5000);
+}
+
+// ==================== CHAT ====================
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    addChatBubble(msg, 'out');
+    input.value = '';
+    setTimeout(() => {
+        const replies = ['Understood!', "I'll be there soon.", 'No problem!', 'Got it, on my way.'];
+        addChatBubble(replies[Math.floor(Math.random() * replies.length)], 'in');
+    }, 1500);
+}
+
+function sendQuickMessage(msg) {
+    addChatBubble(msg, 'out');
+    setTimeout(() => addChatBubble('Acknowledged ✓', 'in'), 1200);
+}
+
+function addChatBubble(text, dir) {
+    const container = document.getElementById('chat-messages');
+    const time = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    const div = document.createElement('div');
+    if (dir === 'out') {
+        div.className = 'flex items-end gap-2 justify-end';
+        div.innerHTML = `<div class="bg-pri-500 text-white rounded-2xl bubble-out p-3 max-w-[75%]"><p class="text-sm">${text}</p><p class="text-[10px] opacity-60 mt-1">${time}</p></div>`;
+    } else {
+        div.className = 'flex items-end gap-2';
+        div.innerHTML = `<div class="text-lg">👩‍⚕️</div><div class="bg-white dark:bg-surface-800 rounded-2xl bubble-in p-3 max-w-[75%] shadow-sm"><p class="text-sm">${text}</p><p class="text-[10px] text-gray-400 mt-1">${time}</p></div>`;
+    }
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+document.getElementById('chat-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
+// ==================== ROLE SWITCH & UNDO ====================
+function switchRole() {
+    if (!currentUser) return;
+    const cur = currentUser.userType;
+    const next = cur === 'patient' ? 'escort' : 'patient';
+    addToHistory('role_switch', { action:'Switched', previousRole: cur, newRole: next });
+    currentUser.userType = next;
+    showToast(`Switched to ${next.charAt(0).toUpperCase() + next.slice(1)} mode`);
+    updateHomeScreen();
+    updateProfileScreen();
+}
+
+function undoLastAction() {
+    if (actionHistory.length === 0) { showToast('Nothing to undo'); return; }
+    const last = actionHistory.pop();
+    switch (last.type) {
+        case 'registration': currentUser = null; originalUserType = null; navigateTo('home'); showToast('Registration undone'); break;
+        case 'booking': showToast(`Booking with ${last.data.escortName} cancelled`); break;
+        case 'job_acceptance': availableJobs.unshift(last.data.job); renderJobs(); showToast('Job returned to available list'); break;
+        case 'emergency_booking': showToast('Emergency request cancelled'); break;
+        case 'role_switch': currentUser.userType = last.data.previousRole; updateHomeScreen(); updateProfileScreen(); showToast(`Switched back to ${last.data.previousRole}`); break;
+        default: showToast('Action undone');
+    }
+    updateHomeScreen();
+    updateProfileScreen();
+}
+
+function addToHistory(type, data) {
+    actionHistory.push({ type, data, timestamp: new Date().toISOString() });
+    if (actionHistory.length > 10) actionHistory.shift();
+}
+
+// ==================== EMERGENCY ====================
+function showEmergencySheet() { document.getElementById('modal-emergency').classList.remove('hidden'); }
+function callEmergency() { closeModal('emergency'); showToast('Calling 999 Emergency Services...'); }
+function notifyFamily() { closeModal('emergency'); showToast('Emergency contact notified via SMS'); }
+function reportIssue() { closeModal('emergency'); showToast('Report submitted. Support will call in 2 min.'); }
+function callEscort() { showToast('Calling Mary Chen...'); }
+
+// ==================== TOAST ====================
+function showToast(msg) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast bg-surface-900 dark:bg-white text-white dark:text-surface-900 rounded-2xl px-5 py-3 text-sm font-medium shadow-2xl text-center mb-2';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3200);
+}
+
+// ==================== EMAIL ====================
+async function sendEmailNotification(type, data) {
+    let subject = '', body = '';
+    const ts = new Date().toLocaleString();
+
+    switch (type) {
+        case 'registration':
+            subject = 'New Registration - ' + (data.userType || '').toUpperCase();
+            body = `NEW USER REGISTRATION\nTime: ${ts}\nType: ${data.userType}\nName: ${data.firstName} ${data.lastName}\nEmail: ${data.email}\nPhone: ${data.phone}\nDistrict: ${data.district}\nID: ${data.id}\nJoined: ${data.joinDate}`;
+            break;
+        case 'login':
+            subject = 'User Login';
+            body = `USER LOGIN\nTime: ${ts}\nEmail: ${data.email}\nType: ${data.userType}`;
+            break;
+        case 'booking':
+            subject = 'New Booking Request';
+            body = `NEW BOOKING\nTime: ${ts}\nPatient: ${data.patient.firstName} ${data.patient.lastName}\nEmail: ${data.patient.email}\nPhone: ${data.patient.phone}\nEscort: ${data.escort.name}\nSpecialty: ${data.escort.specialty}\nDate: ${data.bookingDetails.date}\nTime: ${data.bookingDetails.time}\nLocation: ${data.bookingDetails.location}\nService: ${data.bookingDetails.serviceType}`;
+            break;
+        case 'emergency_booking':
+            subject = 'EMERGENCY BOOKING REQUEST';
+            body = `EMERGENCY BOOKING\nTime: ${ts}\nPRIORITY: HIGH\nPatient: ${currentUser ? currentUser.firstName + ' ' + (currentUser.lastName || '') : 'Unknown'}\nLocation: ${data.location}\nDestination: ${data.destination}\nUrgency: ${data.urgency}\nPhone: ${data.phone}\nDetails: ${data.details}`;
+            break;
+    }
+
+    console.log('Email:', subject, body);
+
+    try {
+        const fd = new FormData();
+        fd.append('access_key', WEB3FORMS_ACCESS_KEY);
+        fd.append('subject', subject);
+        fd.append('from_name', data.firstName ? `${data.firstName} ${data.lastName || ''}` : 'CareConnect');
+        fd.append('email', data.email || 'system@careconnect.hk');
+        fd.append('message', body);
+        const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (result.success) console.log('Email sent to', ADMIN_EMAIL);
+        else console.error('Email error:', result);
+    } catch (err) { console.error('Email error:', err); }
+}
+
+// ==================== INIT ====================
+function init() {
+    availableEscorts = [...sampleEscorts];
+    availableJobs = [...sampleJobs];
+    renderFeaturedEscorts();
+    updateHomeScreen();
+
+    // Splash screen
+    setTimeout(() => {
+        document.getElementById('splash').classList.add('hide');
+        setTimeout(() => document.getElementById('splash').remove(), 500);
+    }, 1200);
+}
+
+init();
+</script>
+
+
+
+</body></html>
